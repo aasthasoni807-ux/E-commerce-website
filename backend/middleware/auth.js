@@ -1,0 +1,20 @@
+import jwt from 'jsonwebtoken';
+
+const protect = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Not authorized, no token' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    try {
+        req.user = jwt.verify(token, process.env.JWT_SECRET); // { id, iat, exp }
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Not authorized, token invalid or expired' });
+    }
+};
+
+export default protect;
